@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -10,8 +9,8 @@ import (
 )
 
 type Rotor struct {
-	wiring   string
-	position int
+	wiring   string // Проводка (соответствие букв)
+	position int    // Текущая позиция (0-25, где 0 = 'A')
 }
 
 type Reflector struct {
@@ -37,7 +36,7 @@ func NewEnigma(rotors []Rotor, reflector Reflector) Enigma {
 
 // rotateRotors вращает роторы после каждого символа
 func (e *Enigma) rotateRotors() {
-	// Вращаем первый ротор (самый правый)
+	// Вращаем первый ротор
 	e.rotors[0].position = (e.rotors[0].position + 1) % 26
 
 	// Проверяем, завершил ли первый ротор полный оборот
@@ -61,9 +60,9 @@ func (e *Enigma) encryptLetter(letter rune) rune {
 
 	// Проход через роторы вперед
 	for i := range e.rotors {
-		index = (index + e.rotors[i].position) % 26
-		index = int(e.rotors[i].wiring[index] - 'A')
-		index = (index - e.rotors[i].position + 26) % 26
+		index = (index + e.rotors[i].position) % 26      // Учет позиции ротора
+		index = int(e.rotors[i].wiring[index] - 'A')     // Преобразование через проводку ротора
+		index = (index - e.rotors[i].position + 26) % 26 // Компенсация позиции ротора
 	}
 
 	// Проход через отражатель
@@ -136,7 +135,7 @@ func main() {
 
 	// Чтение сообщения из файла
 	filePath := "message.txt"
-	messageBytes, err := ioutil.ReadFile(filePath)
+	messageBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Println("Ошибка при чтении файла:", err)
 		return
@@ -145,7 +144,7 @@ func main() {
 
 	// Шифруем сообщение
 	encryptedMessage := enigma.Encrypt(message)
-	fmt.Println("Зашифрованное сообщение:", encryptedMessage)
+	//fmt.Println("Зашифрованное сообщение:", encryptedMessage)
 
 	// Записываем зашифрованное сообщение в файл
 	err = writeToFile("encrypted_message.txt", encryptedMessage)
@@ -159,7 +158,7 @@ func main() {
 
 	// Расшифровка зашифрованного сообщения
 	decryptedMessage := enigma.Encrypt(encryptedMessage)
-	fmt.Println("Расшифрованное сообщение:", decryptedMessage)
+	//fmt.Println("Расшифрованное сообщение:", decryptedMessage)
 
 	// Записываем расшифрованное сообщение в файл
 	err = writeToFile("decrypted_message.txt", decryptedMessage)
